@@ -17,6 +17,7 @@ export default function SignInForm() {
     register,
     handleSubmit,
     getValues,
+    setError,
     formState: { errors },
   } = useForm<SignUpForm>();
 
@@ -24,7 +25,7 @@ export default function SignInForm() {
     try {
       await signInWithPopup(auth, provider);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -32,8 +33,15 @@ export default function SignInForm() {
     try {
       const { email, password } = getValues();
       await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      if (error.code === "auth/invalid-credential") {
+        setError("password", {
+          type: "manual",
+          message: "Invalid credentials",
+        });
+      } else {
+        console.error("Firebase error: ", error.code, error.message);
+      }
     }
   };
 
